@@ -1,41 +1,44 @@
 import { page, route, type Spec } from "@wasp.sh/spec";
+import { renderWithRoleAccess } from "../client/roleRoutes";
 
-import { AnalyticsDashboardPage } from "./dashboards/analytics/AnalyticsDashboardPage" with { type: "ref" };
-import { MessagesPage } from "./dashboards/messages/MessagesPage" with { type: "ref" };
-import { UsersDashboardPage } from "./dashboards/users/UsersDashboardPage" with { type: "ref" };
-import { CalendarPage } from "./elements/calendar/CalendarPage" with { type: "ref" };
-import { SettingsPage } from "./elements/settings/SettingsPage" with { type: "ref" };
-import { ButtonsPage } from "./elements/ui-elements/ButtonsPage" with { type: "ref" };
+import {
+  ProtectedAdminButtonsPage,
+  ProtectedAdminCalendarPage,
+  ProtectedAdminHomePage,
+  ProtectedAdminMessagesPage,
+  ProtectedAdminSettingsPage,
+  ProtectedAdminUsersPage,
+} from "./ProtectedRoutes" with { type: "ref" };
 
 export const adminSpec: Spec = [
   route(
     "AdminRoute",
     "/admin",
-    page(AnalyticsDashboardPage, { authRequired: true }),
+    page(ProtectedAdminHomePage, { authRequired: true }),
   ),
   route(
     "AdminUsersRoute",
     "/admin/users",
-    page(UsersDashboardPage, { authRequired: true }),
+    page(ProtectedAdminUsersPage, { authRequired: true }),
   ),
   route(
     "AdminSettingsRoute",
     "/admin/settings",
-    page(SettingsPage, { authRequired: true }),
+    page(ProtectedAdminSettingsPage, { authRequired: true }),
   ),
   route(
     "AdminCalendarRoute",
     "/admin/calendar",
-    page(CalendarPage, { authRequired: true }),
+    page(ProtectedAdminCalendarPage, { authRequired: true }),
   ),
   route(
     "AdminUIButtonsRoute",
     "/admin/ui/buttons",
-    page(ButtonsPage, { authRequired: true }),
+    page(ProtectedAdminButtonsPage, { authRequired: true }),
   ),
   route(
     "AdminMessagesRoute",
     "/admin/messages",
-    page(MessagesPage, { authRequired: true }),
+    page(ProtectedAdminMessagesPage, { authRequired: true }),
   ),
 ];

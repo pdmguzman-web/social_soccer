@@ -10,6 +10,10 @@ const emailDataSchema = z.object({
   email: z.string(),
 });
 
+function getDefaultRole(email: string): string {
+  return isAdminEmail(email) ? "admin" : "player";
+}
+
 export const getEmailUserFields = defineUserSignupFields({
   email: (data) => {
     const emailData = emailDataSchema.parse(data);
@@ -22,6 +26,10 @@ export const getEmailUserFields = defineUserSignupFields({
   isAdmin: (data) => {
     const emailData = emailDataSchema.parse(data);
     return isAdminEmail(emailData.email);
+  },
+  role: (data) => {
+    const emailData = emailDataSchema.parse(data);
+    return getDefaultRole(emailData.email);
   },
 });
 
@@ -58,6 +66,11 @@ export const getGitHubUserFields = defineUserSignupFields({
       return false;
     }
     return isAdminEmail(emailInfo.email);
+  },
+  role: (data) => {
+    const githubData = githubDataSchema.parse(data);
+    const emailInfo = getGithubEmailInfo(githubData);
+    return isAdminEmail(emailInfo.email) ? "admin" : "player";
   },
 });
 
@@ -98,6 +111,13 @@ export const getGoogleUserFields = defineUserSignupFields({
     }
     return isAdminEmail(googleData.profile.email);
   },
+  role: (data) => {
+    const googleData = googleDataSchema.parse(data);
+    if (!googleData.profile.email_verified) {
+      return "player";
+    }
+    return isAdminEmail(googleData.profile.email) ? "admin" : "player";
+  },
 });
 
 export function getGoogleAuthConfig() {
@@ -135,6 +155,13 @@ export const getDiscordUserFields = defineUserSignupFields({
       return false;
     }
     return isAdminEmail(discordData.profile.email);
+  },
+  role: (data) => {
+    const discordData = discordDataSchema.parse(data);
+    if (!discordData.profile.email || !discordData.profile.verified) {
+      return "player";
+    }
+    return isAdminEmail(discordData.profile.email) ? "admin" : "player";
   },
 });
 

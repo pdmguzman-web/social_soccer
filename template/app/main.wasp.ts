@@ -4,7 +4,7 @@ import { App } from "./src/client/App" with { type: "ref" };
 import { NotFoundPage } from "./src/client/components/NotFoundPage" with { type: "ref" };
 import { serverEnvValidationSchema } from "./src/env" with { type: "ref" };
 import { LandingPage } from "./src/landing-page/LandingPage" with { type: "ref" };
-import { seedMockUsers } from "./src/server/scripts/dbSeeds" with { type: "ref" };
+import { seedDemoData, seedMockUsers } from "./src/server/scripts/dbSeeds" with { type: "ref" };
 
 import { adminSpec } from "./src/admin/admin.wasp";
 import { analyticsSpec } from "./src/analytics/analytics.wasp";
@@ -14,6 +14,8 @@ import { demoAiAppSpec } from "./src/demo-ai-app/demo-ai-app.wasp";
 import { fileUploadSpec } from "./src/file-upload/file-upload.wasp";
 import { paymentSpec } from "./src/payment/payment.wasp";
 import { emailSender } from "./src/server/emailSender.wasp";
+import { playerProfileSpec } from "./src/sports/playerProfile.wasp";
+import { sportsSpec } from "./src/sports/sports.wasp";
 import { userSpec } from "./src/user/user.wasp";
 
 export default app({
@@ -27,6 +29,7 @@ export default app({
     seeds: [
       // Populates the database with a bunch of fake users to work with during development.
       seedMockUsers,
+      seedDemoData,
     ],
   },
   client: {
@@ -47,6 +50,8 @@ export default app({
     paymentSpec,
     fileUploadSpec,
     analyticsSpec,
+    sportsSpec,
+    playerProfileSpec,
     adminSpec,
   ],
 });

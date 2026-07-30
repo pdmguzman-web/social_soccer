@@ -10,10 +10,12 @@ generator client {
 model User {
   id                        String          @id @default(uuid())
   createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
 
   email                     String?         @unique
   username                  String?         @unique
   isAdmin                   Boolean         @default(false)
+  role                      String          @default("player")
 
   paymentProcessorUserId    String?         @unique
   lemonSqueezyCustomerPortalUrl String?     // You can delete this if you're not using Lemon Squeezy as your payments processor.
@@ -22,10 +24,176 @@ model User {
   datePaid                  DateTime?
   credits                   Int             @default(3)
 
+  playerProfile             PlayerProfile?
+  organizedLeagues          League[]        @relation("LeagueOrganizer")
+  leagueMemberships         LeagueMember[]
+  teamCaptains              Team[]          @relation("TeamCaptain")
+  teamPlayers               TeamPlayer[]
+  createdMatches            Match[]         @relation("MatchCreator")
+  matchEvents               MatchEvent[]
+  rewardPoints              RewardPoint[]
+  rewardRedemptions         RewardRedemption[]
+  payments                  Payment[]
+
   gptResponses              GptResponse[]
   contactFormMessages       ContactFormMessage[]
   tasks                     Task[]
   files                     File[]
+}
+
+model PlayerProfile {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
+
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String          @unique
+
+  fullName                  String
+  phone                     String?
+  birthDate                 DateTime?
+  position                  String?
+  heightCm                  Int?
+  weightKg                  Int?
+  emergencyContact          String?
+  documentUrl               String?
+  avatarUrl                 String?
+  status                    String          @default("active")
+}
+
+model League {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
+
+  name                      String
+  description               String?
+  organizer                 User            @relation("LeagueOrganizer", fields: [organizerId], references: [id])
+  organizerId               String
+  status                    String          @default("draft")
+
+  teams                     Team[]
+  members                   LeagueMember[]
+  matches                   Match[]
+  rewardPoints              RewardPoint[]
+  payments                  Payment[]
+}
+
+model Team {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
+
+  league                    League          @relation(fields: [leagueId], references: [id])
+  leagueId                  String
+  name                      String
+  captain                   User?           @relation("TeamCaptain", fields: [captainId], references: [id])
+  captainId                 String?
+
+  players                   TeamPlayer[]
+  homeMatches               Match[]         @relation("HomeTeam")
+  awayMatches               Match[]         @relation("AwayTeam")
+}
+
+model LeagueMember {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+
+  league                    League          @relation(fields: [leagueId], references: [id])
+  leagueId                  String
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String
+  role                      String          @default("player")
+  joinedAt                  DateTime        @default(now())
+
+  @@unique([leagueId, userId])
+}
+
+model TeamPlayer {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+
+  team                      Team            @relation(fields: [teamId], references: [id])
+  teamId                    String
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String
+  joinedAt                  DateTime        @default(now())
+  isActive                  Boolean         @default(true)
+
+  @@unique([teamId, userId])
+}
+
+model Match {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+  updatedAt                 DateTime        @updatedAt
+
+  league                    League          @relation(fields: [leagueId], references: [id])
+  leagueId                  String
+  homeTeam                  Team            @relation("HomeTeam", fields: [homeTeamId], references: [id])
+  homeTeamId                String
+  awayTeam                  Team            @relation("AwayTeam", fields: [awayTeamId], references: [id])
+  awayTeamId                String
+  creator                   User?           @relation("MatchCreator", fields: [creatorId], references: [id])
+  creatorId                 String?
+  scheduledAt               DateTime
+  venue                     String?
+  fieldNumber               String?
+  refereeName               String?
+  status                    String          @default("scheduled")
+
+  events                    MatchEvent[]
+}
+
+model MatchEvent {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+
+  match                     Match           @relation(fields: [matchId], references: [id])
+  matchId                   String
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String
+  eventType                 String
+  minute                    Int?
+  notes                     String?
+}
+
+model RewardPoint {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String
+  league                    League?         @relation(fields: [leagueId], references: [id])
+  leagueId                  String?
+  reason                    String
+  points                    Int             @default(0)
+}
+
+model RewardRedemption {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String
+  pointsUsed                Int             @default(0)
+  description               String
+  status                    String          @default("pending")
+}
+
+model Payment {
+  id                        String          @id @default(uuid())
+  createdAt                 DateTime        @default(now())
+
+  user                      User            @relation(fields: [userId], references: [id])
+  userId                    String
+  league                    League?         @relation(fields: [leagueId], references: [id])
+  leagueId                  String?
+  amount                    Float
+  currency                  String          @default("USD")
+  type                      String          @default("registration")
+  status                    String          @default("pending")
+  processorRef              String?
 }
 
 model GptResponse {

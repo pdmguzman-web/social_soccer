@@ -15,7 +15,9 @@ export function UserMenuItems({
     <>
       {userMenuItems.map((item) => {
         if (item.isAuthRequired && !user) return null;
-        if (item.isAdminOnly && (!user || !user.isAdmin)) return null;
+        const role = ((user?.role as string | undefined) ?? "player") as string;
+        if (item.isAdminOnly && (!user || role !== "admin")) return null;
+        if (item.isDirectorOnly && (!user || !["director", "admin"].includes(role))) return null;
 
         return (
           <li key={item.name}>

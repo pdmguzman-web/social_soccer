@@ -1,4 +1,5 @@
 import { type Task } from "wasp/entities";
+import { RoleDashboard } from "../client/components/RoleDashboard";
 
 import {
   createTask,
@@ -36,6 +37,7 @@ export function DemoAppPage() {
   return (
     <div className="py-10 lg:mt-10">
       <div className="mx-auto max-w-7xl px-6 lg:px-8">
+        <RoleDashboard />
         <div className="mx-auto max-w-4xl text-center">
           <h2 className="text-foreground mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
             <span className="text-primary">AI</span> Day Scheduler

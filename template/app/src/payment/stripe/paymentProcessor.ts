@@ -57,6 +57,10 @@ export const stripePaymentProcessor: PaymentProcessor = {
     prismaUserDelegate,
     userId,
   }: FetchCustomerPortalUrlArgs) => {
+    if (!stripeClient) {
+      return CUSTOMER_PORTAL_RETURN_URL;
+    }
+
     const paymentProcessorUserId = await fetchUserPaymentProcessorUserId(
       userId,
       prismaUserDelegate,
@@ -77,6 +81,10 @@ export const stripePaymentProcessor: PaymentProcessor = {
   webhook: stripeWebhook,
   webhookMiddlewareConfigFn: stripeMiddlewareConfigFn,
   fetchTotalRevenue: async () => {
+    if (!stripeClient) {
+      return 0;
+    }
+
     let totalRevenue = 0;
     const params: Stripe.BalanceTransactionListParams = {
       limit: 100,

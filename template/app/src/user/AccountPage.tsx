@@ -1,6 +1,7 @@
 import { getCustomerPortalUrl, useQuery } from "wasp/client/operations";
 import { Link as WaspRouterLink, routes } from "wasp/client/router";
 import type { User } from "wasp/entities";
+import { getPlayerProfileSummary } from "../sports/playerProfileOperations";
 import { Button } from "../client/components/ui/button";
 import {
   Card,
@@ -17,6 +18,28 @@ import {
 } from "../payment/plans";
 
 export function AccountPage({ user }: { user: User }) {
+  const { data: profileSummary, isLoading } = useQuery(getPlayerProfileSummary);
+  const incentives = [
+    {
+      title: "Asistencia perfecta",
+      description: "Por completar 3 entrenamientos consecutivos.",
+      points: 150,
+      status: "approved" as const,
+    },
+    {
+      title: "Gol del partido",
+      description: "Reconocimiento por tu contribución en el último encuentro.",
+      points: 80,
+      status: "pending" as const,
+    },
+    {
+      title: "Pago de inscripción",
+      description: "Registro y mantenimiento de la cuota del torneo.",
+      points: 0,
+      status: "paid" as const,
+    },
+  ];
+
   return (
     <div className="mt-10 px-6">
       <Card className="mb-4 lg:m-8">
@@ -85,10 +108,59 @@ export function AccountPage({ user }: { user: User }) {
             <div className="px-6 py-4">
               <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
                 <div className="text-muted-foreground text-sm font-medium">
-                  About
+                  Perfil de jugador
                 </div>
                 <div className="text-foreground mt-1 text-sm sm:col-span-2 sm:mt-0">
-                  I'm a cool customer.
+                  {isLoading ? "Cargando..." : (
+                    <div className="space-y-2">
+                      <p>{profileSummary?.profile?.fullName ?? user.username ?? "Sin nombre registrado"}</p>
+                      <div className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                        <span>Goles: {profileSummary?.stats?.goals ?? 0}</span>
+                        <span>Asistencias: {profileSummary?.stats?.assists ?? 0}</span>
+                        <span>Tarjetas: {profileSummary?.stats?.cards ?? 0}</span>
+                        <span>Puntos: {profileSummary?.stats?.totalPoints ?? 0}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            <Separator />
+            <div className="px-6 py-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 sm:gap-4">
+                <div className="text-muted-foreground text-sm font-medium">
+                  Incentivos y pagos
+                </div>
+                <div className="text-foreground mt-1 text-sm sm:col-span-2 sm:mt-0">
+                  <div className="space-y-3">
+                    {incentives.map((item) => (
+                      <div
+                        key={item.title}
+                        className="rounded-lg border border-border/70 bg-muted/20 p-3"
+                      >
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <div>
+                            <p className="font-medium">{item.title}</p>
+                            <p className="text-xs text-muted-foreground">
+                              {item.description}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            {item.points > 0 && (
+                              <span className="text-xs font-semibold text-primary">
+                                +{item.points} pts
+                              </span>
+                            )}
+                            <span
+                              className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${getIncentiveStatusClass(item.status)}`}
+                            >
+                              {getIncentiveStatusLabel(item.status)}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>
@@ -165,6 +237,28 @@ function prettyPrintEndOfBillingPeriod(datePaid: Date) {
     clampedDayOfMonth,
   );
   return endOfBillingPeriod.toLocaleDateString();
+}
+
+function getIncentiveStatusLabel(status: "pending" | "approved" | "paid") {
+  switch (status) {
+    case "pending":
+      return "Pendiente";
+    case "approved":
+      return "Aprobado";
+    case "paid":
+      return "Pagado";
+  }
+}
+
+function getIncentiveStatusClass(status: "pending" | "approved" | "paid") {
+  switch (status) {
+    case "pending":
+      return "bg-amber-100 text-amber-700";
+    case "approved":
+      return "bg-emerald-100 text-emerald-700";
+    case "paid":
+      return "bg-sky-100 text-sky-700";
+  }
 }
 
 function CustomerPortalButton() {
