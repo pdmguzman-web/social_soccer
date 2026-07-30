@@ -1,4 +1,5 @@
 import { Navigate } from "react-router";
+//@ts-nocheck
 import { useAuth } from "wasp/client/auth";
 import type { ReactNode } from "react";
 

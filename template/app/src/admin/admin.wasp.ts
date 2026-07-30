@@ -1,5 +1,5 @@
 import { page, route, type Spec } from "@wasp.sh/spec";
-import { renderWithRoleAccess } from "../client/roleRoutes";
+//import { renderWithRoleAccess } from "../client/roleRoutes";//
 
 import {
   ProtectedAdminButtonsPage,
