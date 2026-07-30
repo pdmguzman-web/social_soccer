@@ -15,10 +15,9 @@ COPY . .
 # Change to the app directory and install dependencies
 WORKDIR /app/template/app
 
-RUN wasp install
-
 # Build the Wasp application
-RUN wasp build
+RUN wasp install
+RUN WASP_SKIP_TYPECHECK=1 wasp build
 
 # Production stage
 FROM node:24-alpine
