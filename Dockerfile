@@ -15,7 +15,7 @@ COPY . .
 # Change to the app directory and install dependencies
 WORKDIR /app/template/app
 
-RUN npm install
+RUN wasp install
 
 # Build the Wasp application
 RUN wasp build
