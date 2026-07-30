@@ -1,5 +1,5 @@
 # Multi-stage Dockerfile for Wasp + Open SaaS
-FROM node:20-alpine AS builder
+FROM node:24-alpine AS builder
 
 # Install build dependencies and Wasp CLI
 RUN apk add --no-cache curl bash git
@@ -21,7 +21,7 @@ RUN npm install
 RUN wasp build
 
 # Production stage
-FROM node:20-alpine
+FROM node:24-alpine
 
 # Install runtime dependencies
 RUN apk add --no-cache curl
