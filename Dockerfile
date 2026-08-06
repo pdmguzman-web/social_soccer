@@ -17,7 +17,7 @@ WORKDIR /app/template/app
 
 # Build the Wasp application
 RUN wasp install
-RUN WASP_SKIP_TYPECHECK=1 wasp build
+RUN npx prisma generate && WASP_SKIP_TYPECHECK=1 wasp build
 
 # Production stage
 FROM node:24-alpine
