@@ -1,48 +1,48 @@
 # Multi-stage Dockerfile for Wasp + Open SaaS
 FROM node:24-alpine AS builder
 
-# Install build dependencies and Wasp CLI
+# Install build dependencies
 RUN apk add --no-cache curl bash git
 
-# Install Wasp CLI
-RUN npm install -g @wasp.sh/wasp-cli
+# Install Wasp CLI using official script
+RUN curl -sSL https://get.wasp.sh/installer.sh | sh
+ENV PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /app
 
 # Copy the entire project
 COPY . .
 
-# Change to the app directory and install dependencies
+# Change to the app directory
 WORKDIR /app/template/app
 
-# Build the Wasp application
+# Install dependencies and build Wasp project
 RUN wasp install
-RUN npx prisma generate --schema=./template/app/schema.prisma || npx prisma generate --schema=./schema.prisma || true
 RUN WASP_SKIP_TYPECHECK=1 wasp build
+
+# Generate Prisma client inside the compiled build output
+WORKDIR /app/template/app/.wasp/build
+RUN npx prisma generate
 
 # Production stage
 FROM node:24-alpine
 
-# Install runtime dependencies
 RUN apk add --no-cache curl
 
 WORKDIR /app
 
 # Copy built app from builder
-COPY --from=builder /app/template/app/.wasp/out ./
+COPY --from=builder /app/template/app/.wasp/build ./
 
-# Install production dependencies for the built app
+# Install production dependencies for the built app server
 WORKDIR /app/server
 RUN npm install --production
 
 WORKDIR /app
 
-# Expose port 3001 for server and 5173 for client
 EXPOSE 3001 5173
 
-# Set environment variables
 ENV NODE_ENV=production
 ENV WASP_SERVER_PORT=3001
 
-# Start the Wasp server
 CMD ["node", "./server/dist/server.js"]
